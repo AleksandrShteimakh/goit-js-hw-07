@@ -1,48 +1,57 @@
-import { galleryItems } from "./gallery-items.js";
+import { galleryItems } from './gallery-items.js';
+// Change code below this line
 
-const ref = document.querySelector(".gallery");
+const gallery = document.querySelector(".gallery");
 
-const renderListImg = galleryItems.reduce(
-  (acc, { preview, original, description }) =>
-    acc +
-    `<div class="gallery__item">
-          <a class="gallery__link" href="${original}">
-            <img
-              class="gallery__image"
-              src="${preview}"
-              data-source="${original}"
-              alt="${description}"
-            />
-          </a>
-        </div>`,
-  ""
-);
-ref.insertAdjacentHTML("beforeend", renderListImg);
+function createGallery({ preview, original, description }) {
+    return `<div class="gallery__item">
+    <a class="gallery__link" href="${original}">
+      <img
+        class="gallery__image"
+        src="${preview}"
+        data-source="${original}"
+        alt="${description}"
+      />
+    </a>
+  </div>`;
+};
+const galleryItem = galleryItems.map(createGallery).join("");
 
-function onImgClick(e) {
-  e.preventDefault();
+gallery.innerHTML += galleryItem;
 
-  if (e.target.nodeName !== "IMG") {
-    return;
-  }
+gallery.addEventListener("click", openImage)
 
-  instanceModal(e);
-}
+function openImage(event) {
+    event.preventDefault();
 
-function instanceModal(e) {
-  const instance = basicLightbox.create(`
-    <img src="${e.target.dataset.source}" width="800" height="600">
-`);
+    if (event.target.nodeName !== "IMG")
+        return;
 
-  instance.show();
+    const instance = basicLightbox.create(
+        `
+  <div class="modal">
+    <img
+    class="modal__image"
+    src="${event.target.dataset.source}"
+    />
+  </div>
+  `,
+        {
+            onShow: instance => {
+                window.addEventListener('keydown', onEscPress);
+                instance.element().querySelector('img').onclick = instance.close;
+            },
+            onClose: instance => {
+                window.removeEventListener('keydown', onEscPress);
+            },
+        }
+    );
 
-  ref.addEventListener("keydown", escButton);
-
-  function escButton(e) {
-    if (e.code === "Escape") {
-      instance.close();
-      ref.removeEventListener("keydown", escButton);
+    function onEscPress(eve) {
+        if (eve.code === 'Escape') {
+            instance.close();
+        }
     }
-  }
+
+    instance.show();
 }
-ref.addEventListener("click", onImgClick);
