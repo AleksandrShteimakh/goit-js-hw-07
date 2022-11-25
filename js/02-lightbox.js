@@ -1,22 +1,32 @@
-import { galleryItems } from './gallery-items.js';
-// Change code below this line
+import { galleryItems } from "./gallery-items.js";
 
-const gallery = document.querySelector(".gallery");
+const ref = document.querySelector(".gallery");
 
-function makeGallery(arr) {
-    const galleryItemsMarkup = arr.map(({ preview, original, description }) => {
-        return `<li><a class="gallery__item" 
-            href="${original}">
-            <img class="gallery__image" src="${preview}" alt="${description}" title="${description}" /></a></li>`;
-    }).join('');
-    return gallery.insertAdjacentHTML('afterbegin', galleryItemsMarkup);
+const createElList = galleryItems.reduce(
+  (acc, { preview, original, description }) =>
+    acc +
+    `<li><a class="gallery__item" href="${original}">
+        <img
+          class="gallery__image"
+          src="${preview}"
+          data-source="${original}"
+          alt="${description}"
+        />
+      </a></li>`,
+  ""
+);
+ref.insertAdjacentHTML("beforeend", createElList);
+
+function onClickImg(e) {
+  e.preventDefault();
+
+  if (e.target.nodeName !== "IMG") {
+    return;
+  }
 }
 
-makeGallery(galleryItems);
-const galleryEl = new SimpleLightbox('.gallery a', {
-    captionsData: "alt",
-    captionsDelay: 250,
+const lightbox = new SimpleLightbox(".gallery a", {
+  captionsData: "alt",
+  captionDelay: "250",
 });
-console.log(galleryEl);
-
-
+ref.addEventListener("click", onClickImg);

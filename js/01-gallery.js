@@ -1,57 +1,48 @@
-import { galleryItems } from './gallery-items.js';
-// Change code below this line
+import { galleryItems } from "./gallery-items.js";
 
-const gallery = document.querySelector(".gallery");
+const ref = document.querySelector(".gallery");
 
-function createGallery({ preview, original, description }) {
-    return `<div class="gallery__item">
-    <a class="gallery__link" href="${original}">
-      <img
-        class="gallery__image"
-        src="${preview}"
-        data-source="${original}"
-        alt="${description}"
-      />
-    </a>
-  </div>`;
-};
-const galleryItem = galleryItems.map(createGallery).join("");
+const renderListImg = galleryItems.reduce(
+  (acc, { preview, original, description }) =>
+    acc +
+    `<div class="gallery__item">
+          <a class="gallery__link" href="${original}">
+            <img
+              class="gallery__image"
+              src="${preview}"
+              data-source="${original}"
+              alt="${description}"
+            />
+          </a>
+        </div>`,
+  ""
+);
+ref.insertAdjacentHTML("beforeend", renderListImg);
 
-gallery.innerHTML += galleryItem;
+function onImgClick(e) {
+  e.preventDefault();
 
-gallery.addEventListener("click", openImage)
+  if (e.target.nodeName !== "IMG") {
+    return;
+  }
 
-function openImage(event) {
-    event.preventDefault();
-
-    if (event.target.nodeName !== "IMG")
-        return;
-
-    const instance = basicLightbox.create(
-        `
-  <div class="modal">
-    <img
-    class="modal__image"
-    src="${event.target.dataset.source}"
-    />
-  </div>
-  `,
-        {
-            onShow: instance => {
-                window.addEventListener('keydown', onEscPress);
-                instance.element().querySelector('img').onclick = instance.close;
-            },
-            onClose: instance => {
-                window.removeEventListener('keydown', onEscPress);
-            },
-        }
-    );
-
-    function onEscPress(eve) {
-        if (eve.code === 'Escape') {
-            instance.close();
-        }
-    }
-
-    instance.show();
+  instanceModal(e);
 }
+
+function instanceModal(e) {
+  const instance = basicLightbox.create(`
+    <img src="${e.target.dataset.source}" width="800" height="600">
+`);
+
+  instance.show();
+
+  ref.addEventListener("keydown", escButton);
+
+  function escButton(e) {
+    if (e.code === "Escape") {
+      instance.close();
+      ref.removeEventListener("keydown", escButton);
+    }
+  }
+}
+ref.addEventListener("click", onImgClick);
